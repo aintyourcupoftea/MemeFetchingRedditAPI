@@ -4,6 +4,7 @@ import os
 import requests
 from io import BytesIO
 import time
+from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 
@@ -30,18 +31,25 @@ def fetch_top_post():
     cached_post_image = requests.get(cached_post_url)
     cached_time = time.time()
     
+    print("Fetched new top post.")
     return cached_post_image
+
+# Schedule the fetch_top_post function to run once every 24 hours
+scheduler = BackgroundScheduler()
+scheduler.add_job(fetch_top_post, 'interval', hours=24)
+scheduler.start()
+
+# Ensure the top post is fetched when the app starts
+fetch_top_post()
 
 @app.route('/')
 def index():
     global cached_post_image, cached_time
 
-    current_time = time.time()
-    if cached_post_image is None or current_time - cached_time > 86400:
-        # Fetch new data from Reddit API
-        fetch_top_post()
-
     return send_file(BytesIO(cached_post_image.content), mimetype='image/png')
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 7860)))
+    try:
+        app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 7860)))
+    finally:
+        scheduler.shutdown()
