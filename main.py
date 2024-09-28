@@ -1,9 +1,11 @@
 from flask import Flask, send_file
+from flask_cors import CORS  # Import Flask-CORS
 import praw
 import requests
 from io import BytesIO
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # Reddit API credentials
 reddit = praw.Reddit(
