@@ -3,6 +3,8 @@ from flask_cors import CORS  # Import Flask-CORS
 import praw
 import requests
 from io import BytesIO
+import random
+import os
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -14,19 +16,20 @@ reddit = praw.Reddit(
     user_agent='GithubReadMe'
 )
 
-# Function to fetch top post URL and image from r/ProgrammerHumor
-def fetch_top_post():
+# Function to fetch top posts URL and image from r/ProgrammerHumor
+def fetch_top_posts():
     subreddit = reddit.subreddit('ProgrammerHumor')
-    top_post = next(subreddit.top('day', limit=1))  # Fetch top post of the day
+    top_posts = list(subreddit.top('day', limit=5))  # Fetch top 5 posts of the day
+    random_post = random.choice(top_posts)
     
-    post_url = top_post.url
+    post_url = random_post.url
     post_image = requests.get(post_url)
     
     return post_image.content
 
 @app.route('/')
 def index():
-    image_data = fetch_top_post()
+    image_data = fetch_top_posts()
     return send_file(BytesIO(image_data), mimetype='image/png')
 
 if __name__ == '__main__':
