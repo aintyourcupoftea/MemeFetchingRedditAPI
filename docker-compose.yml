@@ -1,11 +1,10 @@
 services:
   memes:
-    image: memes_from_reddit:latest
-    container_name: memes_from_reddit
-    restart: unless-stopped
+    build: .  # ✅ Build from Dockerfile in current directory
+    container_name: meme-app
+    restart: always
     ports:
       - "7860:7860"
     environment:
-      - PYTHONUNBUFFERED=1
-    # volumes:
-    #   - ./data:/data
+      - WEB_CONCURRENCY=8
+      - THREADS_PER_WORKER=4
