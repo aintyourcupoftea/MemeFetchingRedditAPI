@@ -1,4 +1,3 @@
-# Use Python 3.11 (faster than 3.10)
 FROM python:3.11-slim
 
 # Set environment variables
@@ -14,14 +13,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /code
 
-# Copy requirements first (better caching)
+# Copy requirements
 COPY ./requirements.txt /code/requirements.txt
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-# Copy application code
+# Copy application
 COPY . .
 
-# Use multiple workers for better performance
-CMD ["gunicorn", "-b", "0.0.0.0:7860", "-w", "4", "--threads", "2", "--timeout", "30", "main:app"]
+# Expose port
+EXPOSE 7860
+
+# Run with Uvicorn (async, high performance)
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860", "--workers", "4"]
