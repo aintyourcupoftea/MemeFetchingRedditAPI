@@ -185,6 +185,18 @@ async def ensure_cache_fresh():
         return False
 
 
+@app.options("/")
+async def options_meme():
+    """Handle CORS preflight"""
+    return Response(
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
+
+
 @app.get("/")
 async def get_meme():
     """Serve a random meme"""
@@ -211,9 +223,12 @@ async def get_meme():
             content=image_data,
             media_type="image/jpeg",
             headers={
-                "Cache-Control": "public, max-age=3600",  # Cloudflare will cache for 1 hour
+                "Cache-Control": "public, max-age=3600",
                 "CDN-Cache-Control": "public, max-age=3600",
                 "Cloudflare-CDN-Cache-Control": "public, max-age=3600",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, OPTIONS",
+                "Access-Control-Allow-Headers": "*",
             },
         )
 
@@ -296,4 +311,3 @@ async def stats():
         }
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
-
